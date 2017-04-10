@@ -6,7 +6,7 @@ https://heroku-blog-files.s3.amazonaws.com/posts/1473343845-django-asgi-websocke
 1. No, all your code runs synchronously without any sockets or event loops to block. You can use async code within a Django view or channel consumer if you like - for example, to fetch lots of URLs in parallel - but it doesn’t affect the overall deployed site.
 2. There are a couple of other limitations - messages must be made of serializable types, and stay under a certain size limit - but these are implementation details you won’t need to worry about until you get to more advanced usage.
 3. It’s optional for a backend implementation to understand this - after all, it’s only important at scale, where you want to shard the two types differently — but it’s present nonetheless.
-4. `http.request` this is also a channel. what is it. what sorts of messages pass to such channel
+4. `http.request` this is also a channel. what is it. what sorts of messages pass to such channel --- `answer` so it came to notice that like other ws channels, the older http wsgi request are sent to the http.request channel, if left unhandled, this channel layer is routed by default to proper view.
 
 ## WHAT IS CHANNEL?
 Channel is simply an ordered queue(FIFO). Note: it is not a network dedicated pipe or something, though it sounds like that. So, multiple users can write to the same channel backend, each of which can be uniquely identified.
@@ -45,7 +45,7 @@ notifying clients of changes in real time(chat or *in admin, when other user is 
 django-channels distinguishes between either using special character (`!`) in the response channel's name. while the normal/incoming channel can only have `a-zA-Z0-9_-`
 
 ## Groups
-Channels can't broadcast. They only deliver to a single channel. And here comes the user of froups. 
+Channels can't broadcast. They only deliver to a single channel. And here comes the user of groups. 
 
 ```python
 def ws_connect(message):
@@ -62,12 +62,8 @@ def ws_connect(message):
     message.reply_channel.send({'accept': True})
 ```
 
-similarly, which will handle `websocket.disconnect`
+similarly, we can handle `websocket.disconnect`
 
-```python
-def ws_disconnect(message):
-  pass
-```
 
 But, channels are stateless, channel server has no concept of closing a channel if an interface server goes away - after all, channels are meant to hold messages until a consumer comes along to pickup the message, until it expires.
 
@@ -124,7 +120,7 @@ if (socket.readyState = WebSocket.OPEN) socket.onopen()
 
 **Note** Channels added to a group expires if their messages expire but disconnect handler will get called nearly allof the time anyway.
 
-**Note** We suggest you design your applications the same way - rather than relying on 100% guaranteed delivery, which Channels won’t give you, look at each failure case and program something to expect and handle it - be that retry logic, partial content handling, or just having something not work that one time.
+**Note** We suggest you design your applications the same way - rather than relying on 100% guaranteed delivery, which *Channels won’t give you*, look at each failure case and program something to expect and handle it - be that retry logic, partial content handling, or just having something not work that one time.
 
 # Running with Channels
 We will probably be runningwitho one or more interface servers, and one or more worker servers, connected by some channel layer.
@@ -163,11 +159,13 @@ using `runworker`, it will exit, hence not for cross-process communication.
 
 Channels comes with `daphne`, an interface server that can handle both HTTP and WebSockets at the same time, and then ties this into run when you run `runserver`.
 
-*under the hood, runserver is running daphne in one thread amd a worker with --autoreload in another*
+*under the hood, runserver is running daphne in one thread and a worker with --autoreload in another*
 
 Either 
 1. `runserver`
+
 Or
+
 1. `runserver --noworker`
 2. `runworker` optionally `-v 2` to see logs
 
