@@ -186,6 +186,8 @@ There are few decorators that we can use on consumers.
 
 `channel_and_http_session_user_from_http` will do transferring and adding message.user attribute, but along with that rehydrates the http_session.
 
+So, **good practice** is to use *channel_session_user_from_http* at the ws_connect consumer while, *channel_session_user* at the ws_receive and ws_disconnect consumers.
+
 
 # Persisting Data
 `reply_channel` attribute is a unique pointer to the open ws and varies between clients.
