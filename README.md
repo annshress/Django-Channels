@@ -169,6 +169,24 @@ Or
 1. `runserver --noworker`
 2. `runworker` optionally `-v 2` to see logs
 
+# Authentication
+[auth](https://github.com/django/channels/blob/master/channels/auth.py)
+
+There are few decorators that we can use on consumers.
+1. `channel_session`
+2. `channel_session_user`
+3. `channel_session_user_from_http`
+4. `channel_and_http_session_user_from_http`
+
+`channel_session` is responsible for creating a channel_session attribute in the message that persists across consumers with same `reply_channel` attribute.
+
+`channel_session_user` will add attribute message.user from the channel_session, rather than http_session. And this also turns channel_session implicitly.
+
+`channel_session_user_from_http` will call the *`transfer_user`* method which transfers the http session to channel session. And also add attribute *message.user*.
+
+`channel_and_http_session_user_from_http` will do transferring and adding message.user attribute, but along with that rehydrates the http_session.
+
+
 # Persisting Data
 `reply_channel` attribute is a unique pointer to the open ws and varies between clients.
 channels is network-transparent and can run in multiple workers, so storing it in global var wont help.
